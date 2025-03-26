@@ -36,15 +36,50 @@ createWheel(0.9, 1.5);
 scene.add(car);
 
 // Camera follow variables
-const cameraOffset = new THREE.Vector3(0, 3, 8); // Position behind the car
-const smoothFactor = 0.1; // How smooth the transition is
+const cameraOffset = new THREE.Vector3(0, 3, 8);
+const smoothFactor = 0.1;
 
-// Function to update camera position smoothly
 function updateCamera() {
     const targetPosition = car.position.clone().add(cameraOffset.clone().applyMatrix4(car.matrixWorld));
     camera.position.lerp(targetPosition, smoothFactor);
     camera.lookAt(car.position);
 }
+
+// Detect if the device is touch-based
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Keyboard controls
+const keys = {};
+if (!isMobile) {
+    window.addEventListener("keydown", (e) => (keys[e.code] = true));
+    window.addEventListener("keyup", (e) => (keys[e.code] = false));
+}
+
+// Touch controls
+let touchX = 0, touchStartX = 0;
+let touchY = 0, touchStartY = 0;
+let isTouching = false;
+
+window.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isTouching = true;
+    }
+});
+
+window.addEventListener("touchmove", (e) => {
+    if (isTouching && e.touches.length === 1) {
+        touchX = e.touches[0].clientX - touchStartX;
+        touchY = e.touches[0].clientY - touchStartY;
+    }
+});
+
+window.addEventListener("touchend", () => {
+    isTouching = false;
+    touchX = 0;
+    touchY = 0;
+});
 
 // Car movement variables
 let speed = 0;
@@ -54,23 +89,26 @@ const acceleration = 0.01;
 const friction = 0.005;
 const turnRate = 0.03;
 
-// Keyboard controls
-const keys = {};
-window.addEventListener("keydown", (e) => (keys[e.code] = true));
-window.addEventListener("keyup", (e) => (keys[e.code] = false));
-
-// Update car movement
 function updateCar() {
-    if (keys["ArrowUp"]) speed = Math.min(speed + acceleration, maxSpeed);
-    else if (keys["ArrowDown"]) speed = Math.max(speed - acceleration, -maxSpeed / 2);
-    else {
-        if (speed > 0) speed = Math.max(speed - friction, 0);
-        else if (speed < 0) speed = Math.min(speed + friction, 0);
-    }
+    if (isMobile) {
+        if (touchY < -30) speed = Math.min(speed + acceleration, maxSpeed);
+        else if (touchY > 30) speed = Math.max(speed - acceleration, -maxSpeed / 2);
 
-    if (keys["ArrowLeft"]) turnSpeed = -turnRate;
-    else if (keys["ArrowRight"]) turnSpeed = turnRate;
-    else turnSpeed = 0;
+        if (touchX < -30) turnSpeed = -turnRate;
+        else if (touchX > 30) turnSpeed = turnRate;
+        else turnSpeed = 0;
+    } else {
+        if (keys["ArrowUp"]) speed = Math.min(speed + acceleration, maxSpeed);
+        else if (keys["ArrowDown"]) speed = Math.max(speed - acceleration, -maxSpeed / 2);
+        else {
+            if (speed > 0) speed = Math.max(speed - friction, 0);
+            else if (speed < 0) speed = Math.min(speed + friction, 0);
+        }
+
+        if (keys["ArrowLeft"]) turnSpeed = -turnRate;
+        else if (keys["ArrowRight"]) turnSpeed = turnRate;
+        else turnSpeed = 0;
+    }
 
     car.rotation.y += turnSpeed * (speed !== 0 ? 1 : 0);
     car.position.x -= Math.sin(car.rotation.y) * speed;
@@ -83,7 +121,6 @@ const segmentLength = 10;
 const numSegments = 10;
 const roadWidth = 5;
 
-// Create road segments
 function createRoadSegment(z) {
     const geometry = new THREE.PlaneGeometry(roadWidth, segmentLength);
     const material = new THREE.MeshBasicMaterial({ color: 0x555555, side: THREE.DoubleSide });
@@ -99,7 +136,6 @@ for (let i = 0; i < numSegments; i++) {
     createRoadSegment(i * segmentLength);
 }
 
-// Function to update road
 function updateRoad() {
     for (let i = 0; i < roadSegments.length; i++) {
         if (roadSegments[i].position.z - car.position.z < -segmentLength) {
