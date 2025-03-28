@@ -158,3 +158,60 @@ function animate() {
     renderer.render(scene, camera);
 }
 animate();
+
+
+// Speed tracking variables
+let speed = 0;
+let isAccelerating = false;
+
+// Function to update speed display on screen
+function updateSpeedDisplay() {
+    let speedElement = document.getElementById("speed-display");
+    if (!speedElement) {
+        speedElement = document.createElement("div");
+        speedElement.id = "speed-display";
+        speedElement.style.position = "absolute";
+        speedElement.style.top = "10px";
+        speedElement.style.left = "10px";
+        speedElement.style.color = "white";
+        speedElement.style.fontSize = "20px";
+        document.body.appendChild(speedElement);
+    }
+    speedElement.innerText = `Speed: ${speed.toFixed(2)}`;
+}
+
+// Accelerate the car
+function accelerate() {
+    isAccelerating = true;
+    speed += 0.5;  // Adjust for smoother acceleration
+    updateSpeedDisplay();
+}
+
+// Stop accelerating
+function stopAcceleration() {
+    isAccelerating = false;
+}
+
+// Decelerate gradually when not accelerating
+function decelerate() {
+    if (!isAccelerating && speed > 0) {
+        speed -= 0.3;  // Slow down smoothly
+    }
+    if (speed < 0) {
+        speed = 0;
+    }
+    updateSpeedDisplay();
+}
+
+// Add mobile touch controls
+document.addEventListener("touchstart", (e) => {
+    accelerate();
+});
+
+document.addEventListener("touchend", (e) => {
+    stopAcceleration();
+});
+
+// Keep updating speed display
+setInterval(updateSpeedDisplay, 100);
+setInterval(decelerate, 200);
