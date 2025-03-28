@@ -2,37 +2,22 @@
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Background color for visibility
+renderer.setClearColor(0x87CEEB); // Sky Blue
+
+// Speed indicator reference
+const speedIndicator = document.getElementById("speed-indicator");
+
 // Create car group
 const car = new THREE.Group();
-
-// Car body
 const bodyGeometry = new THREE.BoxGeometry(2, 1, 4);
 const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
 body.position.y = 0.5;
 car.add(body);
-
-// Wheels
-const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.5, 32);
-const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-
-function createWheel(x, z) {
-    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
-    wheel.rotation.z = Math.PI / 2;
-    wheel.position.set(x, 0.2, z);
-    car.add(wheel);
-}
-
-createWheel(-0.9, -1.5);
-createWheel(0.9, -1.5);
-createWheel(-0.9, 1.5);
-createWheel(0.9, 1.5);
-
-// Add car to scene
 scene.add(car);
 
 // Camera follow variables
@@ -45,10 +30,8 @@ function updateCamera() {
     camera.lookAt(car.position);
 }
 
-// Detect if the device is touch-based
+// Mobile & Keyboard Controls
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-// Keyboard controls
 const keys = {};
 if (!isMobile) {
     window.addEventListener("keydown", (e) => (keys[e.code] = true));
@@ -113,6 +96,9 @@ function updateCar() {
     car.rotation.y += turnSpeed * (speed !== 0 ? 1 : 0);
     car.position.x -= Math.sin(car.rotation.y) * speed;
     car.position.z -= Math.cos(car.rotation.y) * speed;
+
+    // Update speed indicator
+    speedIndicator.innerText = `Speed: ${(speed * 100).toFixed(0)}`;
 }
 
 // Road variables
@@ -158,60 +144,3 @@ function animate() {
     renderer.render(scene, camera);
 }
 animate();
-
-
-// Speed tracking variables
-let speed = 0;
-let isAccelerating = false;
-
-// Function to update speed display on screen
-function updateSpeedDisplay() {
-    let speedElement = document.getElementById("speed-display");
-    if (!speedElement) {
-        speedElement = document.createElement("div");
-        speedElement.id = "speed-display";
-        speedElement.style.position = "absolute";
-        speedElement.style.top = "10px";
-        speedElement.style.left = "10px";
-        speedElement.style.color = "white";
-        speedElement.style.fontSize = "20px";
-        document.body.appendChild(speedElement);
-    }
-    speedElement.innerText = `Speed: ${speed.toFixed(2)}`;
-}
-
-// Accelerate the car
-function accelerate() {
-    isAccelerating = true;
-    speed += 0.5;  // Adjust for smoother acceleration
-    updateSpeedDisplay();
-}
-
-// Stop accelerating
-function stopAcceleration() {
-    isAccelerating = false;
-}
-
-// Decelerate gradually when not accelerating
-function decelerate() {
-    if (!isAccelerating && speed > 0) {
-        speed -= 0.3;  // Slow down smoothly
-    }
-    if (speed < 0) {
-        speed = 0;
-    }
-    updateSpeedDisplay();
-}
-
-// Add mobile touch controls
-document.addEventListener("touchstart", (e) => {
-    accelerate();
-});
-
-document.addEventListener("touchend", (e) => {
-    stopAcceleration();
-});
-
-// Keep updating speed display
-setInterval(updateSpeedDisplay, 100);
-setInterval(decelerate, 200);
