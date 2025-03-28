@@ -7,29 +7,15 @@
         body {
             margin: 0;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             background-color: black;
         }
         canvas {
-            background-color: skyblue;
-        }
-        #speedDisplay {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 5px;
-            border-radius: 5px;
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="speedDisplay">Speed: 0</div>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
