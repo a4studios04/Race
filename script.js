@@ -5,13 +5,21 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Background color for visibility
-renderer.setClearColor(0x87CEEB); // Sky Blue
+// Background color
+renderer.setClearColor(0x87CEEB); // Sky blue
 
-// Speed indicator reference
-const speedIndicator = document.getElementById("speed-indicator");
+// Speed indicator
+const speedIndicator = document.createElement("div");
+speedIndicator.style.position = "absolute";
+speedIndicator.style.top = "10px";
+speedIndicator.style.left = "10px";
+speedIndicator.style.padding = "5px 10px";
+speedIndicator.style.background = "gray";
+speedIndicator.style.color = "white";
+speedIndicator.style.fontSize = "14px";
+document.body.appendChild(speedIndicator);
 
-// Create car group
+// Create car
 const car = new THREE.Group();
 const bodyGeometry = new THREE.BoxGeometry(2, 1, 4);
 const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -30,7 +38,7 @@ function updateCamera() {
     camera.lookAt(car.position);
 }
 
-// Mobile & Keyboard Controls
+// Controls
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const keys = {};
 if (!isMobile) {
@@ -68,9 +76,9 @@ window.addEventListener("touchend", () => {
 let speed = 0;
 let turnSpeed = 0;
 const maxSpeed = 0.2;
-const acceleration = 0.01;
-const friction = 0.005;
-const turnRate = 0.03;
+const acceleration = 0.008; // Adjusted for smoother acceleration
+const friction = 0.004; // Less friction for better control
+const turnRate = 0.015; // Lowered turn sensitivity
 
 function updateCar() {
     if (isMobile) {
